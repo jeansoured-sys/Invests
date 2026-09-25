@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Invests</title>
+<style>
+  :root{
+    --bg:#0a0710;
+    --bg2:#120c1c;
+    --card:#170f26;
+    --card2:#1d1430;
+    --purple:#8b5cf6;
+    --purple2:#a78bfa;
+    --purple-deep:#5b21b6;
+    --text:#f1edf9;
+    --muted:#9c93b5;
+    --danger:#f87171;
+    --border:#2a2040;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(139,92,246,0.18), transparent 45%),
+      radial-gradient(circle at 100% 30%, rgba(91,33,182,0.15), transparent 50%),
+      var(--bg);
+    color:var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    min-height:100%;
+    padding:24px 16px 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  header{
+    display:flex;align-items:center;gap:12px;margin-bottom:24px;
+  }
+  .logo{
+    width:42px;height:42px;border-radius:12px;
+    background:linear-gradient(135deg,var(--purple),var(--purple-deep));
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:700;
+    box-shadow:0 0 20px rgba(139,92,246,0.5);
+  }
+  h1{font-size:22px;margin:0;letter-spacing:0.5px;}
+  .sub{color:var(--muted);font-size:12px;margin-top:2px;}
+
+  .tabs{
+    display:flex;gap:8px;margin-bottom:20px;
+    background:var(--bg2);
+    padding:6px;border-radius:14px;
+    border:1px solid var(--border);
+  }
+  .tab-btn{
+    flex:1;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:10px 8px;
+    border:none;border-radius:10px;
+    background:transparent;
+    color:var(--muted);
+    font-size:14px;font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+    min-width:0;
+  }
+  .tab-btn span.tname{
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;
+  }
+  .tab-btn.active{
+    background:linear-gradient(135deg,var(--purple),var(--purple-deep));
+    color:#fff;
+    box-shadow:0 2px 12px rgba(139,92,246,0.45);
+  }
+  .edit-icon{
+    opacity:0;pointer-events:none;font-size:11px;
+  }
+  .tab-btn.active .edit-icon{opacity:0.85;pointer-events:auto;cursor:pointer;}
+
+  .panel{display:none;animation:fade .2s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .card{
+    background:linear-gradient(180deg,var(--card),var(--card2));
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .form-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .field{flex:1;min-width:120px;display:flex;flex-direction:column;gap:6px;}
+  label{font-size:12px;color:var(--muted);}
+  input[type="number"], input[type="date"], input[type="text"]{
+    background:var(--bg2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:15px;
+    outline:none;
+    width:100%;
+  }
+  input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,0.2);}
+  .btn{
+    background:linear-gradient(135deg,var(--purple),var(--purple-deep));
+    color:#fff;border:none;border-radius:10px;
+    padding:10px 18px;font-size:14px;font-weight:600;
+    cursor:pointer;
+    box-shadow:0 2px 10px rgba(139,92,246,0.35);
+    transition:transform .1s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn.ghost{
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    box-shadow:none;
+  }
+
+  .entries{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;}
+  .entry{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .entry .date{color:var(--muted);font-size:13px;}
+  .entry .value{font-weight:700;color:var(--purple2);}
+  .entry .del{
+    background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:0 4px;
+  }
+  .empty{color:var(--muted);font-size:13px;text-align:center;padding:20px 0;}
+
+  .total-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);
+  }
+  .total-bar .label{color:var(--muted);font-size:13px;}
+  .total-bar .amount{font-size:20px;font-weight:800;color:#fff;}
+
+  .totais-grid{display:flex;flex-direction:column;gap:12px;}
+  .totais-item{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;
+  }
+  .totais-item .tname2{font-size:14px;color:var(--muted);}
+  .totais-item .tval{font-size:17px;font-weight:700;}
+  .grand{
+    background:linear-gradient(135deg,var(--purple-deep),var(--purple));
+    border:none;
+  }
+  .grand .tname2{color:#e9e1ff;}
+  .grand .tval{color:#fff;font-size:24px;}
+
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--purple-deep);border-radius:6px;}
+
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="light"]){}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">₹</div>
+    <div>
+      <h1>Invests</h1>
+      <div class="sub">Suas anotações de investimentos</div>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabsBar"></div>
+
+  <div id="panels"></div>
+</div>
+
+<script>
+const STORAGE_KEY = "invests-app-data-v1";
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ console.warn("Falha ao ler storage", e); }
+  return {
+    tab1: { name: "Renda Fixa", entries: [] },
+    tab2: { name: "Renda Variável", entries: [] }
+  };
+}
+
+function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }catch(e){ console.warn("Falha ao salvar storage", e); }
+}
+
+let data = loadData();
+let activeTab = "tab1";
+
+const tabsBar = document.getElementById("tabsBar");
+const panelsEl = document.getElementById("panels");
+
+function fmt(v){
+  return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function fmtDate(d){
+  if(!d) return "-";
+  const [y,m,day] = d.split("-");
+  return `${day}/${m}/${y}`;
+}
+function sumEntries(entries){
+  return entries.reduce((acc,e)=>acc + (parseFloat(e.value)||0), 0);
+}
+
+function renderTabsBar(){
+  tabsBar.innerHTML = "";
+  const defs = [
+    {key:"tab1", name:data.tab1.name, editable:true},
+    {key:"tab2", name:data.tab2.name, editable:true},
+    {key:"totais", name:"Totais", editable:false}
+  ];
+  defs.forEach(d=>{
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (activeTab===d.key ? " active":"");
+    btn.innerHTML = `<span class="tname">${d.name}</span>` + (d.editable ? `<span class="edit-icon" title="Renomear">✎</span>` : "");
+    btn.onclick = (ev)=>{
+      if(ev.target.classList.contains("edit-icon")){
+        ev.stopPropagation();
+        renameTab(d.key);
+        return;
+      }
+      activeTab = d.key;
+      render();
+    };
+    tabsBar.appendChild(btn);
+  });
+}
+
+function renameTab(key){
+  const novo = prompt("Novo nome para a aba:", data[key].name);
+  if(novo && novo.trim()){
+    data[key].name = novo.trim().slice(0,24);
+    saveData();
+    render();
+  }
+}
+
+function renderInvestPanel(key){
+  const t = data[key];
+  const total = sumEntries(t.entries);
+  const sorted = [...t.entries].sort((a,b)=> (b.date||"").localeCompare(a.date||""));
+
+  const panel = document.createElement("div");
+  panel.className = "panel active";
+  panel.innerHTML = `
+    <div class="card">
+      <div class="form-row">
+        <div class="field">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" min="0" id="input-value-${key}" placeholder="0,00">
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <input type="date" id="input-date-${key}">
+        </div>
+      </div>
+      <button class="btn" id="add-${key}">Adicionar aporte</button>
+    </div>
+    <div class="card">
+      <ul class="entries" id="list-${key}">
+        ${sorted.length===0 ? `<li class="empty">Nenhum aporte registrado ainda.</li>` :
+          sorted.map(e=>`
+            <li class="entry" data-id="${e.id}">
+              <span class="date">${fmtDate(e.date)}</span>
+              <span class="value">${fmt(parseFloat(e.value)||0)}</span>
+              <button class="del" data-id="${e.id}" data-key="${key}">✕</button>
+            </li>
+          `).join("")
+        }
+      </ul>
+      <div class="total-bar">
+        <span class="label">Total em ${t.name}</span>
+        <span class="amount">${fmt(total)}</span>
+      </div>
+    </div>
+  `;
+  panelsEl.appendChild(panel);
+
+  const dateInput = panel.querySelector(`#input-date-${key}`);
+  const todayStr = new Date().toISOString().slice(0,10);
+  dateInput.value = todayStr;
+
+  panel.querySelector(`#add-${key}`).onclick = ()=>{
+    const valInput = panel.querySelector(`#input-value-${key}`);
+    const val = parseFloat(valInput.value);
+    const dt = dateInput.value;
+    if(!val || val<=0){ valInput.focus(); return; }
+    if(!dt){ dateInput.focus(); return; }
+    t.entries.push({ id: Date.now()+"_"+Math.random().toString(36).slice(2,7), value: val, date: dt });
+    saveData();
+    render();
+  };
+
+  panel.querySelectorAll(".del").forEach(btn=>{
+    btn.onclick = ()=>{
+      const id = btn.getAttribute("data-id");
+      const k = btn.getAttribute("data-key");
+      data[k].entries = data[k].entries.filter(e=>e.id!==id);
+      saveData();
+      render();
+    };
+  });
+}
+
+function renderTotaisPanel(){
+  const t1 = sumEntries(data.tab1.entries);
+  const t2 = sumEntries(data.tab2.entries);
+  const grand = t1+t2;
+
+  const panel = document.createElement("div");
+  panel.className = "panel active";
+  panel.innerHTML = `
+    <div class="card">
+      <div class="totais-grid">
+        <div class="totais-item">
+          <span class="tname2">${data.tab1.name}</span>
+          <span class="tval">${fmt(t1)}</span>
+        </div>
+        <div class="totais-item">
+          <span class="tname2">${data.tab2.name}</span>
+          <span class="tval">${fmt(t2)}</span>
+        </div>
+        <div class="totais-item grand">
+          <span class="tname2">Total geral investido</span>
+          <span class="tval">${fmt(grand)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+  panelsEl.appendChild(panel);
+}
+
+function render(){
+  renderTabsBar();
+  panelsEl.innerHTML = "";
+  if(activeTab==="tab1" || activeTab==="tab2"){
+    renderInvestPanel(activeTab);
+  } else {
+    renderTotaisPanel();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
